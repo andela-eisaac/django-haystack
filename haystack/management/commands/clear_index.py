@@ -11,6 +11,10 @@ from haystack import connections
 class Command(BaseCommand):
     help = "Clears out the search index completely."
 
+    def __init__(self, *args, **kwargs):
+        super(Command, self).__init__(*args, **kwargs)
+        self.verbosity, self.commit = (None, None)
+
     def add_arguments(self, parser):
         parser.add_argument(
             '--noinput', action='store_false', dest='interactive', default=True,
