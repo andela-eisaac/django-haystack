@@ -5,6 +5,7 @@ import re
 
 from django.template import Context, loader
 from django.utils import datetime_safe, six
+from django import VERSION as DJANGO_VERSION
 
 from haystack.exceptions import SearchFieldError
 from haystack.utils import get_model_ct_tuple
@@ -16,7 +17,16 @@ class NOT_PROVIDED:
 # Note that dates in the full ISO 8601 format will be accepted as long as the hour/minute/second components
 # are zeroed for compatibility with search backends which lack a date time distinct from datetime:
 DATE_REGEX = re.compile(r'^(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})(?:|T00:00:00Z?)$')
-DATETIME_REGEX = re.compile(r'^(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})(T|\s+)(?P<hour>\d{2}):(?P<minute>\d{2}):(?P<second>\d{2}).*?$')
+DATETIME_REGEX = re.compile(
+    r'^(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})(T|\s+)(?P<hour>\d{2}):(?P<minute>\d{2}):(?P<second>\d{2}).*?$'
+)
+
+if DJANGO_VERSION >= (1, 8):
+    def make_context(context):
+        return context
+else:
+    def make_context(context):
+        return Context(context)
 
 
 # All the SearchFields variants.
@@ -102,7 +112,9 @@ class SearchField(object):
                         # accesses will fail miserably.
                         break
                     else:
-                        raise SearchFieldError("The model '%s' combined with model_attr '%s' returned None, but doesn't allow a default or null value." % (repr(obj), self.model_attr))
+                        raise SearchFieldError("The model '{}' combined with model_attr '{}' returned None,"
+                                               "but doesn't allow a default or null value."
+                                               .format(repr(obj), self.model_attr))
 
             if callable(current_object):
                 return current_object()
@@ -124,7 +136,8 @@ class SearchField(object):
         its context.
         """
         if self.instance_name is None and self.template_name is None:
-            raise SearchFieldError("This field requires either its instance_name variable to be populated or an explicit template_name in order to load the correct template.")
+            raise SearchFieldError("This field requires either its instance_name variable to be populated or an "
+                                   "explicit template_name in order to load the correct template.")
 
         if self.template_name is not None:
             template_names = self.template_name
@@ -136,7 +149,7 @@ class SearchField(object):
             template_names = ['search/indexes/%s/%s_%s.txt' % (app_label, model_name, self.instance_name)]
 
         t = loader.select_template(template_names)
-        return t.render({'object': obj})
+        return t.render(make_context({'object': obj}))
 
     def convert(self, value):
         """
