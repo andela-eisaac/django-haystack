@@ -59,7 +59,6 @@ def update_worker(args):
 
 def do_update(backend, index, qs, start, end, total, verbosity=1, commit=True,
               max_retries=DEFAULT_MAX_RETRIES):
-
     # Get a clone of the QuerySet so that the cache doesn't bloat up
     # in memory. Useful when reindexing large amounts of data.
     small_cache_qs = qs.all()

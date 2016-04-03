@@ -40,7 +40,10 @@ class Command(BaseCommand):
             using = connections.connections_info.keys()
 
         if options.get('interactive', True):
-            self.stdout.write("WARNING: This will irreparably remove EVERYTHING from your search index in connection '%s'." % "', '".join(using))
+            self.stdout.write(
+                "WARNING: This will irreparably remove EVERYTHING from your search index in connection '{}'.".format(
+                    "', '".join(using)))
+
             self.stdout.write("Your choices after this are to restore from backups or rebuild via the `rebuild_index` command.")
 
             yes_or_no = six.moves.input("Are you sure you wish to continue? [y/N] ")

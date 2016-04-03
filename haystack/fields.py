@@ -105,7 +105,9 @@ class SearchField(object):
 
             for attr in attrs:
                 if not hasattr(current_object, attr):
-                    raise SearchFieldError("The model '%s' does not have a model_attr '%s'." % (repr(current_object), attr))
+                    raise SearchFieldError(
+                        "The model '{}' does not have a model_attr '{}'.".format(repr(current_object), attr)
+                    )
 
                 current_object = getattr(current_object, attr, None)
 
@@ -121,9 +123,10 @@ class SearchField(object):
                         # accesses will fail miserably.
                         break
                     else:
-                        raise SearchFieldError("The model '{}' combined with model_attr '{}' returned None,"
-                                               "but doesn't allow a default or null value."
-                                               .format(repr(obj), self.model_attr))
+                        raise SearchFieldError(
+                            "The model '{}' combined with model_attr '{}' returned None, "
+                            "but doesn't allow a default or null value.".format(repr(obj), self.model_attr)
+                        )
 
             if callable(current_object):
                 return current_object()
@@ -340,7 +343,10 @@ class DateField(SearchField):
                 data = match.groupdict()
                 return datetime_safe.date(int(data['year']), int(data['month']), int(data['day']))
             else:
-                raise SearchFieldError("Date provided to '%s' field doesn't appear to be a valid date string: '%s'" % (self.instance_name, value))
+                raise SearchFieldError(
+                    "Date provided to '{}' field doesn't appear to be a valid date string: '{}'"
+                    .format(self.instance_name, value)
+                )
 
         return value
 
@@ -366,9 +372,13 @@ class DateTimeField(SearchField):
 
             if match:
                 data = match.groupdict()
-                return datetime_safe.datetime(int(data['year']), int(data['month']), int(data['day']), int(data['hour']), int(data['minute']), int(data['second']))
+                return datetime_safe.datetime(int(data['year']), int(data['month']), int(data['day']),
+                                              int(data['hour']), int(data['minute']), int(data['second']))
             else:
-                raise SearchFieldError("Datetime provided to '%s' field doesn't appear to be a valid datetime string: '%s'" % (self.instance_name, value))
+                raise SearchFieldError(
+                    "Datetime provided to '{}' field doesn't appear to be a valid datetime string: '{}'".format(
+                        self.instance_name, value)
+                )
 
         return value
 
