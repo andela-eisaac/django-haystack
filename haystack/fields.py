@@ -14,12 +14,21 @@ from haystack.utils import get_model_ct_tuple
 class NOT_PROVIDED:
     pass
 
+
 # Note that dates in the full ISO 8601 format will be accepted as long as the hour/minute/second components
 # are zeroed for compatibility with search backends which lack a date time distinct from datetime:
 DATE_REGEX = re.compile(r'^(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})(?:|T00:00:00Z?)$')
-DATETIME_REGEX = re.compile(
-    r'^(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})(T|\s+)(?P<hour>\d{2}):(?P<minute>\d{2}):(?P<second>\d{2}).*?$'
-)
+DATETIME_REGEX = re.compile('''
+^
+(?P<year>\d{4})-
+(?P<month>\d{2})-
+(?P<day>\d{2})
+(T|\s+)              # Time flag or an space
+(?P<hour>\d{2}):
+(?P<minute>\d{2}):
+(?P<second>\d{2}).*?
+$
+''', flags=re.VERBOSE)
 
 if DJANGO_VERSION >= (1, 8):
     def make_context(context):
