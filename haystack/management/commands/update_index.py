@@ -204,13 +204,23 @@ class Command(BaseCommand):
                 pass
 
         labels = options.get('app_label') or haystack_load_apps()
+
+        output = []
+
         for label in labels:
-            for using in self.backends:
-                try:
-                    self.update_backend(label, using)
-                except:
-                    LOG.exception("Error updating %s using %s ", label, using)
-                    raise
+            label_output = self.handle_label(label, **options)
+            if label_output:
+                output.append(label_output)
+
+        return '\n'.join(output)
+
+    def handle_label(self, label, **options):
+        for using in self.backends:
+            try:
+                self.update_backend(label, using)
+            except:
+                LOG.exception("Error updating %s using %s ", label, using)
+                raise
 
     def update_backend(self, label, using):
         backend = haystack_connections[using].get_backend()
@@ -252,7 +262,7 @@ class Command(BaseCommand):
                     do_update(backend, index, qs, start, end, total, verbosity=self.verbosity,
                               commit=self.commit, max_retries=self.max_retries)
                 else:
-                    ghetto_queue.append((model, start, end, total, using, self.start_date, self.end_date,
+                    ghetto_queue.append(('do_update', model, start, end, total, using, self.start_date, self.end_date,
                                          self.verbosity, self.commit, self.max_retries))
 
             if self.workers > 0:
